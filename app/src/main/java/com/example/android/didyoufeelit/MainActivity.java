@@ -15,6 +15,7 @@
  */
 package com.example.android.didyoufeelit;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -34,11 +35,37 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Perform the HTTP request for earthquake data and process the response.
+        NetworkTask dyfi = new NetworkTask();
+        dyfi.execute(USGS_REQUEST_URL);
+
+/*        // Perform the HTTP request for earthquake data and process the response.
         Event earthquake = Utils.fetchEarthquakeData(USGS_REQUEST_URL);
 
         // Update the information displayed to the user.
-        updateUi(earthquake);
+        updateUi(earthquake);*/
+    }
+
+    private class NetworkTask extends AsyncTask<String, Void, Event> {
+        protected Event doInBackground(String... urls) {
+            // Don't perform the request if there are no URLs, or the first URL is null.
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
+            }
+
+            Event result = Utils.fetchEarthquakeData(urls[0]);
+            return result;
+
+        }
+
+
+        protected void onPostExecute(Event result) {
+            // If there is no result, do nothing.
+            if (result == null) {
+                return;
+            }
+
+            updateUi(result);
+        }
     }
 
     /**
